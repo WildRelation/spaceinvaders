@@ -43,8 +43,8 @@ function Game() {
         gameHeight: 300,
         fps: 50,
         debugMode: false,
-        invaderRanks: 5,
-        invaderFiles: 10,
+        invaderRanks: 3,
+        invaderFiles: 6,
         shipSpeed: 120,
         levelDifficultyMultiplier: 0.2,
         pointsPerInvader: 5,
@@ -91,6 +91,15 @@ Game.prototype.initialise = function(gameCanvas) {
         top: gameCanvas.height / 2 - this.config.gameHeight / 2,
         bottom: gameCanvas.height / 2 + this.config.gameHeight / 2,
     };
+
+    //  Pre-load PNG sprites.
+    this.images = {};
+    var imageFiles = { invader: 'images/invader.png', ship: 'images/ship.png', rocket: 'images/rocket.png', bomb: 'images/bomb.png' };
+    for (var key in imageFiles) {
+        var img = new Image();
+        img.src = imageFiles[key];
+        this.images[key] = img;
+    }
 };
 
 Game.prototype.moveToState = function(state) {
@@ -362,8 +371,8 @@ PlayState.prototype.enter = function(game) {
     for(var rank = 0; rank < ranks; rank++){
         for(var file = 0; file < files; file++) {
             invaders.push(new Invader(
-                (game.width / 2) + ((files/2 - file) * 200 / files),
-                (game.gameBounds.top + rank * 20),
+                (game.width / 2) + ((files/2 - file) * 360 / files),
+                (game.gameBounds.top + rank * 56),
                 rank, file, 'Invader'));
         }
     }
@@ -562,28 +571,48 @@ PlayState.prototype.draw = function(game, dt, ctx) {
     ctx.clearRect(0, 0, game.width, game.height);
     
     //  Draw ship.
-    ctx.fillStyle = '#999999';
-    ctx.fillRect(this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height);
+    var shipImg = game.images.ship;
+    if (shipImg.complete && shipImg.naturalWidth > 0) {
+        ctx.drawImage(shipImg, this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height);
+    } else {
+        ctx.fillStyle = '#999999';
+        ctx.fillRect(this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height);
+    }
 
     //  Draw invaders.
-    ctx.fillStyle = '#006600';
+    var invaderImg = game.images.invader;
     for(var i=0; i<this.invaders.length; i++) {
         var invader = this.invaders[i];
-        ctx.fillRect(invader.x - invader.width/2, invader.y - invader.height/2, invader.width, invader.height);
+        if (invaderImg.complete && invaderImg.naturalWidth > 0) {
+            ctx.drawImage(invaderImg, invader.x - invader.width/2, invader.y - invader.height/2, invader.width, invader.height);
+        } else {
+            ctx.fillStyle = '#006600';
+            ctx.fillRect(invader.x - invader.width/2, invader.y - invader.height/2, invader.width, invader.height);
+        }
     }
 
     //  Draw bombs.
-    ctx.fillStyle = '#ff5555';
+    var bombImg = game.images.bomb;
     for(var i=0; i<this.bombs.length; i++) {
         var bomb = this.bombs[i];
-        ctx.fillRect(bomb.x - 2, bomb.y - 2, 4, 4);
+        if (bombImg.complete && bombImg.naturalWidth > 0) {
+            ctx.drawImage(bombImg, bomb.x - 16, bomb.y - 16, 32, 32);
+        } else {
+            ctx.fillStyle = '#ff5555';
+            ctx.fillRect(bomb.x - 2, bomb.y - 2, 4, 4);
+        }
     }
 
     //  Draw rockets.
-    ctx.fillStyle = '#ff0000';
+    var rocketImg = game.images.rocket;
     for(var i=0; i<this.rockets.length; i++) {
         var rocket = this.rockets[i];
-        ctx.fillRect(rocket.x, rocket.y - 2, 1, 4);
+        if (rocketImg.complete && rocketImg.naturalWidth > 0) {
+            ctx.drawImage(rocketImg, rocket.x - 12, rocket.y - 24, 24, 24);
+        } else {
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(rocket.x, rocket.y - 2, 1, 4);
+        }
     }
 
     //  Draw info.
@@ -721,8 +750,8 @@ LevelIntroState.prototype.draw = function(game, dt, ctx) {
 function Ship(x, y) {
     this.x = x;
     this.y = y;
-    this.width = 20;
-    this.height = 16;
+    this.width = 48;
+    this.height = 48;
 }
 
 /*
@@ -761,8 +790,8 @@ function Invader(x, y, rank, file, type) {
     this.rank = rank;
     this.file = file;
     this.type = type;
-    this.width = 18;
-    this.height = 14;
+    this.width = 44;
+    this.height = 44;
 }
 
 /*

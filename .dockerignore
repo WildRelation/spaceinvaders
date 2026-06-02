@@ -1,0 +1,6 @@
+.git
+.github
+*.md
+makefile
+screenshot.jpg
+.replit
